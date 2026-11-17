@@ -1,0 +1,63 @@
+# Сценарии проверки в браузере (Playwright), снимки экрана и фактические результаты.
+# Запуск вручную; при save=true результаты сохраняются в docs/verification отдельным коммитом.
+name: browser
+
+on:
+  workflow_dispatch:
+    inputs:
+      save:
+        description: 'Сохранить результаты в репозиторий'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - run: dotnet build RoomBooking.sln -c Release
+      - name: Модульные тесты
+        run: dotnet test RoomBooking.sln --no-build -c Release --logger "console;verbosity=normal" 2>&1 | tee test-output.txt
+      - name: Основные сценарии
+        run: |
+          rm -rf docs/verification
+          cd src/RoomBooking.Web && rm -f roombooking.db
+          nohup dotnet run --no-build -c Release --urls http://localhost:5085 > /tmp/app1.log 2>&1 &
+          cd ../..
+          for i in $(seq 1 60); do curl -s http://localhost:5085 > /dev/null && break; sleep 1; done
+          python tools/browser_scenarios.py main
+          pkill -f RoomBooking.Web || true
+          sleep 3
+      - name: Перезапуск и проверка сохранности
+        run: |
+          cd src/RoomBooking.Web
+          nohup dotnet run --no-build -c Release --urls http://localhost:5085 > /tmp/app2.log 2>&1 &
+          cd ../..
+          for i in $(seq 1 60); do curl -s http://localhost:5085 > /dev/null && break; sleep 1; done
+          python tools/browser_scenarios.py restart
+          python tools/browser_scenarios.py tests test-output.txt
+          cp test-output.txt docs/verification/test-output.txt
+          pkill -f RoomBooking.Web || true
+          grep -iE "fail|exception" /tmp/app1.log | head -20 || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verification
+          path: docs/verification
+      - name: Сохранение результатов
+        if: ${{ inputs.save }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add docs/verification
+          git commit -m "Результаты проверки в браузере и снимки экрана [skip ci]" || echo "нет изменений"
+          git push
