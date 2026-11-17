@@ -1,0 +1,24 @@
+# RoomBooking — файлы, которые не хранятся в репозитории
+
+# Результаты сборки .NET
+bin/
+obj/
+
+# Настройки среды разработки
+.vs/
+.idea/
+.vscode/
+*.user
+
+# Файл базы SQLite создаётся миграцией при первом запуске
+roombooking.db*
+
+# Отчёты NUnit
+TestResults/
+
+# Кэш Python (сценарии Playwright в tools/)
+__pycache__/
+.pytest_cache/
+
+# Архивы для сдачи этапов
+*.zip

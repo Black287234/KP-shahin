@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Доменный слой: сущности и правила предметной области, без зависимости от веб-интерфейса и базы данных -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RoomBooking.Core</RootNamespace>
+    <Description>Правила бронирования учебных аудиторий: аудитория, интервал времени, бронирование</Description>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

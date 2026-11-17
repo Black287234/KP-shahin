@@ -1,0 +1,18 @@
+# Непрерывная интеграция: восстановление пакетов, сборка и тесты при каждой отправке изменений
+name: ci
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore RoomBooking.sln
+      - run: dotnet build RoomBooking.sln --no-restore --configuration Release
+      - run: dotnet test RoomBooking.sln --no-build --configuration Release --verbosity normal
