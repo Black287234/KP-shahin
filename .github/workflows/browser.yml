@@ -34,7 +34,7 @@ jobs:
         run: dotnet test RoomBooking.sln --no-build -c Release --logger "console;verbosity=normal" 2>&1 | tee test-output.txt
       - name: Основные сценарии
         run: |
-          rm -rf docs/verification
+          rm -rf docs/verification/shots docs/verification/results.json
           cd src/RoomBooking.Web && rm -f roombooking.db
           nohup dotnet run --no-build -c Release --urls http://localhost:5085 > /tmp/app1.log 2>&1 &
           cd ../..
