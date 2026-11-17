@@ -34,7 +34,7 @@
       "scenario": "С22",
       "title": "API: заявка с нарушенным форматом JSON и неверной датой",
       "expected": "400 Bad Request с текстом ошибки на русском языке",
-      "actual_before": "HTTP 400: Microsoft.AspNetCore.Http.BadHttpRequestException: Failed to read parameter \"BookingJson b\" from the request body as JSON. ---> System.Text.Json.JsonException: ",
+      "actual_before": "HTTP 400, в ответе — текст исключения BadHttpRequestException на английском языке: «Failed to read parameter … from the request body as JSON»",
       "cause": "Ошибка разбора JSON обрабатывалась платформой: в режиме разработки возвращался текст исключения на английском языке, в рабочем режиме — пустой ответ",
       "fix": "Промежуточный обработчик ApiErrors перехватывает BadHttpRequestException для адресов /api и возвращает {\"error\": \"...\"} на русском языке"
     }
