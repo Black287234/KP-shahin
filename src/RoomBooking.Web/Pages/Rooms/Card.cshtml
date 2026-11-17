@@ -4,12 +4,38 @@
     var r = Model.Room;
     ViewData["Title"] = "Аудитория " + r.Code;
 }
-<h1>Аудитория @r.Code</h1>
-<p class="sub">@r.Building · @r.Kind.Text()</p>
+<div class="head-row">
+    <div>
+        <h1>Аудитория @r.Code</h1>
+        <p class="sub">@r.Building · @r.Kind.Text()</p>
+    </div>
+    <a class="btn light" asp-page="/Rooms/Edit" asp-route-id="@r.Id">Изменить сведения</a>
+</div>
+
 <div class="panel">
     <dl class="facts">
         <dt>Количество мест</dt><dd>@r.Seats</dd>
         <dt>Проектор</dt><dd>@(r.HasProjector ? "есть" : "нет")</dd>
+        <dt>Состояние</dt>
+        <dd>@if (r.IsOutOfService) { <span class="tag cancel">выведена из эксплуатации</span> <span class="muted">— @r.OutOfServiceReason</span> } else { <span class="tag plan">используется</span> }</dd>
     </dl>
 </div>
-<p><a class="btn light" asp-page="/Rooms/Index">К каталогу</a></p>
+
+<h2>Эксплуатация</h2>
+<div class="panel">
+@if (r.IsOutOfService)
+{
+    <form method="post" asp-page-handler="Return" class="row">
+        <p class="muted">Аудитория не принимает бронирования. После возвращения в эксплуатацию бронирование снова станет доступным.</p>
+        <button class="btn" type="submit">Вернуть в эксплуатацию</button>
+    </form>
+}
+else
+{
+    <form method="post" asp-page-handler="OutOfService" class="row">
+        <div class="field wide"><label for="Reason">Причина вывода из эксплуатации</label><input id="Reason" name="Reason" maxlength="200" placeholder="например, ремонт системы вентиляции" /></div>
+        <button class="btn warn" type="submit">Вывести из эксплуатации</button>
+    </form>
+}
+</div>
+<p class="back"><a class="btn light" asp-page="/Rooms/Index">К каталогу</a></p>

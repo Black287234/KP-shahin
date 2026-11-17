@@ -1,0 +1,6 @@
+@{
+    var ok = TempData["Ok"] as string;
+    var err = TempData["Err"] as string;
+}
+@if (ok != null) { <div class="note ok" role="status">@ok</div> }
+@if (err != null) { <div class="note err" role="alert">@err</div> }

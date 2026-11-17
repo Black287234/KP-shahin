@@ -3,21 +3,55 @@
 @{
     ViewData["Title"] = "Аудитории";
 }
-<h1>Каталог аудиторий</h1>
-<p class="sub">Всего аудиторий: @Model.Rooms.Count</p>
-<table class="grid">
-    <thead><tr><th>Номер</th><th>Корпус</th><th>Назначение</th><th>Мест</th><th>Проектор</th><th></th></tr></thead>
-    <tbody>
-    @foreach (var r in Model.Rooms)
-    {
-        <tr>
-            <td><b>@r.Code</b></td>
-            <td>@r.Building</td>
-            <td>@r.Kind.Text()</td>
-            <td>@r.Seats</td>
-            <td>@(r.HasProjector ? "есть" : "нет")</td>
-            <td><a asp-page="/Rooms/Card" asp-route-id="@r.Id">Карточка</a></td>
-        </tr>
-    }
-    </tbody>
-</table>
+<div class="head-row">
+    <div>
+        <h1>Каталог аудиторий</h1>
+        <p class="sub">Найдено аудиторий: @Model.Rooms.Count</p>
+    </div>
+    <a class="btn" asp-page="/Rooms/Edit">Зарегистрировать аудиторию</a>
+</div>
+
+<form method="get" class="panel row filter">
+    <div class="field"><label for="Text">Номер</label><input asp-for="Text" placeholder="например, А-1" /></div>
+    <div class="field">
+        <label for="Building">Корпус</label>
+        <select asp-for="Building">
+            <option value="">все</option>
+            @foreach (var b in Model.Buildings) { <option value="@b">@b</option> }
+        </select>
+    </div>
+    <div class="field">
+        <label for="Kind">Назначение</label>
+        <select asp-for="Kind" asp-items="Html.GetEnumSelectList<RoomKind>()"><option value="">любое</option></select>
+    </div>
+    <div class="field narrow"><label for="MinSeats">Мест не менее</label><input asp-for="MinSeats" type="number" min="1" /></div>
+    <label class="check"><input asp-for="Projector" /> с проектором</label>
+    <label class="check"><input asp-for="All" /> включая выведенные</label>
+    <button class="btn" type="submit">Найти</button>
+    <a class="btn light" asp-page="/Rooms/Index">Сбросить</a>
+</form>
+
+@if (Model.Rooms.Count == 0)
+{
+    <div class="note info">Аудитории, удовлетворяющие условиям отбора, не найдены.</div>
+}
+else
+{
+    <table class="grid">
+        <thead><tr><th>Номер</th><th>Корпус</th><th>Назначение</th><th class="num">Мест</th><th>Проектор</th><th>Состояние</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.Rooms)
+        {
+            <tr class="@(r.IsOutOfService ? "off" : "")">
+                <td><b>@r.Code</b></td>
+                <td>@r.Building</td>
+                <td>@r.Kind.Text()</td>
+                <td class="num">@r.Seats</td>
+                <td>@(r.HasProjector ? "есть" : "нет")</td>
+                <td>@if (r.IsOutOfService) { <span class="tag cancel">выведена</span> } else { <span class="tag plan">используется</span> }</td>
+                <td class="actions"><a asp-page="/Rooms/Card" asp-route-id="@r.Id">Карточка</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

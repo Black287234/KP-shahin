@@ -15,6 +15,10 @@ public class Room
     public int Seats { get; private set; }
     public bool HasProjector { get; private set; }
 
+    /// <summary>Аудитория выведена из эксплуатации (ремонт, переоборудование) и не бронируется.</summary>
+    public bool IsOutOfService { get; private set; }
+    public string? OutOfServiceReason { get; private set; }
+
     private Room() { }   // для Entity Framework Core
 
     public Room(string code, string building, RoomKind kind, int seats, bool hasProjector)
@@ -42,6 +46,21 @@ public class Room
         HasProjector = hasProjector;
     }
 
-    /// <summary>Присвоение идентификатора (используется хранилищем этапа 1).</summary>
-    internal void AssignId(int id) => Id = id;
+    /// <summary>Вывод из эксплуатации вместо удаления: история бронирований сохраняется.</summary>
+    public void TakeOutOfService(string reason)
+    {
+        reason = (reason ?? "").Trim();
+        if (IsOutOfService) throw new DomainException($"Аудитория {Code} уже выведена из эксплуатации");
+        if (reason.Length < 5) throw new DomainException("Укажите причину вывода из эксплуатации (не менее 5 символов)");
+        if (reason.Length > 200) throw new DomainException("Причина не должна превышать 200 символов");
+        IsOutOfService = true;
+        OutOfServiceReason = reason;
+    }
+
+    public void ReturnToService()
+    {
+        if (!IsOutOfService) throw new DomainException($"Аудитория {Code} уже используется");
+        IsOutOfService = false;
+        OutOfServiceReason = null;
+    }
 }

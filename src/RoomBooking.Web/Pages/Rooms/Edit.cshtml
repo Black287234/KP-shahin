@@ -1,0 +1,26 @@
+@page "{id:int?}"
+@model RoomBooking.Web.Pages.Rooms.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Регистрация аудитории" : "Изменение аудитории";
+}
+<h1>@ViewData["Title"]</h1>
+<p class="sub">Номер приводится к верхнему регистру и должен быть уникальным в каталоге.</p>
+
+<form method="post" class="panel form" novalidate>
+    <div asp-validation-summary="All" class="note err"></div>
+    <div class="row">
+        <div class="field"><label asp-for="Input.Code"></label><input asp-for="Input.Code" maxlength="20" /></div>
+        <div class="field"><label asp-for="Input.Building"></label><input asp-for="Input.Building" maxlength="50" list="buildings" /></div>
+        <datalist id="buildings"><option value="Корпус А"></option><option value="Корпус Б"></option></datalist>
+    </div>
+    <div class="row">
+        <div class="field"><label asp-for="Input.Kind"></label><select asp-for="Input.Kind" asp-items="Html.GetEnumSelectList<RoomKind>()"></select></div>
+        <div class="field narrow"><label asp-for="Input.Seats"></label><input asp-for="Input.Seats" type="number" min="1" max="@Room.MaxSeats" /></div>
+        <label class="check"><input asp-for="Input.HasProjector" /> есть проектор</label>
+    </div>
+    <div class="row">
+        <button class="btn" type="submit">Сохранить</button>
+        @if (Model.IsNew) { <a class="btn light" asp-page="/Rooms/Index">Отмена</a> }
+        else { <a class="btn light" asp-page="/Rooms/Card" asp-route-id="@Model.Id">Отмена</a> }
+    </div>
+</form>

@@ -57,3 +57,13 @@ table.grid tr.off td { color: #8a95a1; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
 footer { color: var(--muted); font-size: 13px; padding: 16px 0 28px; border-top: 1px solid var(--line); }
+.head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.filter { margin-bottom: 18px; }
+.field.narrow { min-width: 110px; max-width: 140px; }
+.field.wide { flex: 1; min-width: 280px; }
+form.form .row { margin-bottom: 14px; }
+table.grid td.num, table.grid th.num { text-align: right; }
+table.grid td.actions { white-space: nowrap; text-align: right; }
+.validation-summary-valid { display: none; }
+.note ul { margin: 0; padding-left: 18px; }
+.back { margin-top: 20px; }
