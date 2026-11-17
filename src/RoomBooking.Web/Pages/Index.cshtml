@@ -1,10 +1,43 @@
 @page
+@model RoomBooking.Web.Pages.IndexModel
 @{
     ViewData["Title"] = "Главная";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
 }
 <h1>Бронирование учебных аудиторий</h1>
-<p class="sub">Справочник аудиторий, бронирование на дату и время, отмена бронирования, контроль пересечения заявок и расписание занятости.</p>
-<div class="panel">
-    <p>Этап 2: каталог аудиторий хранится в базе данных SQLite; доступны регистрация, изменение и вывод аудитории из эксплуатации.</p>
-    <a class="btn" asp-page="/Rooms/Index">Перейти к каталогу аудиторий</a>
+<p class="sub">Сводка на @Model.Now.ToString("d MMMM yyyy, HH:mm", culture)</p>
+
+<div class="tiles">
+    <div class="tile"><b>@Model.RoomsInService</b>аудиторий в эксплуатации</div>
+    <div class="tile"><b>@Model.TodayCount</b>бронирований сегодня</div>
+    <div class="tile"><b>@Model.InProgress</b>занятий идёт сейчас</div>
+    <div class="tile"><b>@Model.FreeNow</b>аудиторий свободно сейчас</div>
 </div>
+
+<div class="row actions-row">
+    <a class="btn" asp-page="/Reservations/New">Забронировать аудиторию</a>
+    <a class="btn light" asp-page="/Schedule/Free">Найти свободную аудиторию</a>
+    <a class="btn light" asp-page="/Schedule/Day">Расписание на сегодня</a>
+</div>
+
+<h2>Ближайшие бронирования</h2>
+@if (Model.Upcoming.Count == 0)
+{
+    <div class="note info">Запланированных бронирований на ближайшую неделю нет.</div>
+}
+else
+{
+    <table class="grid">
+        <thead><tr><th>Дата</th><th>Время</th><th>Аудитория</th><th>Цель</th><th>Ответственный</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.Upcoming)
+        {
+            <tr>
+                <td>@r.Start.ToString("dd.MM.yyyy")</td><td>@r.Start.ToString("HH:mm")–@r.End.ToString("HH:mm")</td>
+                <td><b>@r.Room!.Code</b></td><td>@r.Purpose</td><td>@r.Organizer</td>
+                <td class="actions"><a asp-page="/Reservations/Card" asp-route-id="@r.Id">Открыть</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

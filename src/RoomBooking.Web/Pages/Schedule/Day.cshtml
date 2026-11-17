@@ -1,0 +1,28 @@
+@page
+@model RoomBooking.Web.Pages.Schedule.DayModel
+@{
+    ViewData["Title"] = "Расписание на день";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+}
+<h1>Расписание занятости на @Model.Day.ToString("d MMMM yyyy", culture)</h1>
+<p class="sub">@culture.TextInfo.ToTitleCase(Model.Day.ToString("dddd", culture)). Рабочий день @TimeSlot.DayStart.ToString("HH:mm")–@TimeSlot.DayEnd.ToString("HH:mm"); отменённые бронирования не учитываются.</p>
+
+<form method="get" class="panel row filter">
+    <a class="btn light" asp-route-date="@Model.Day.AddDays(-1).ToString("yyyy-MM-dd")">Предыдущий день</a>
+    <div class="field"><label for="Date">Дата</label><input asp-for="Date" type="date" value="@Model.Day.ToString("yyyy-MM-dd")" /></div>
+    <button class="btn" type="submit">Показать</button>
+    <a class="btn light" asp-route-date="@Model.Day.AddDays(1).ToString("yyyy-MM-dd")">Следующий день</a>
+</form>
+
+<div class="panel sched">
+    <div class="sched-row head"><div class="who"></div><partial name="_Scale" /><div class="load">Загрузка</div></div>
+    @foreach (var row in Model.Rows)
+    {
+        <div class="sched-row">
+            <div class="who"><a asp-page="/Schedule/Week" asp-route-roomId="@row.Room.Id" asp-route-date="@Model.Day.ToString("yyyy-MM-dd")"><b>@row.Room.Code</b></a><span class="muted small">@row.Room.Seats мест</span></div>
+            <partial name="_Timeline" model="row.Blocks" />
+            <div class="load">@row.LoadPercent %</div>
+        </div>
+    }
+</div>
+<p class="muted small">Занятый отрезок открывает карточку бронирования; номер аудитории — её расписание на неделю.</p>

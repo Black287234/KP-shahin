@@ -1,0 +1,17 @@
+@model IReadOnlyList<ScheduleBlock>
+@* Шкала рабочего дня: ширина отрезка пропорциональна его продолжительности *@
+<div class="timeline">
+@foreach (var b in Model)
+{
+    var w = (100.0 * b.Minutes / ScheduleBuilder.WorkingMinutes).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+    if (b.IsFree)
+    {
+        <span class="seg free" style="width:@w%" title="Свободно @b.From.ToString("HH:mm")–@b.To.ToString("HH:mm")"></span>
+    }
+    else
+    {
+        <a class="seg busy" style="width:@w%" asp-page="/Reservations/Card" asp-route-id="@b.Reservation!.Id"
+           title="@b.From.ToString("HH:mm")–@b.To.ToString("HH:mm") · @b.Reservation.Purpose · @b.Reservation.Organizer">@b.From.ToString("HH:mm")</a>
+    }
+}
+</div>

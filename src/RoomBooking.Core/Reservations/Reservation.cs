@@ -26,16 +26,17 @@ public class Reservation
     public string? CancelReason { get; private set; }
 
     public bool IsCancelled => CancelledAt != null;
+    public TimeSlot Slot => new(Start, End);
 
     private Reservation() { }   // для Entity Framework Core
 
-    internal Reservation(Room room, DateTime start, DateTime end, string organizer, string? studyGroup,
+    internal Reservation(Room room, TimeSlot slot, string organizer, string? studyGroup,
         string purpose, int attendees, DateTime createdAt)
     {
         Room = room;
         RoomId = room.Id;
-        Start = start;
-        End = end;
+        Start = slot.Start;
+        End = slot.End;
         Organizer = organizer;
         StudyGroup = studyGroup;
         Purpose = purpose;
@@ -43,14 +44,32 @@ public class Reservation
         CreatedAt = createdAt;
     }
 
+    public ReservationState StateAt(DateTime now) =>
+        IsCancelled ? ReservationState.Cancelled
+        : now < Start ? ReservationState.Planned
+        : now < End ? ReservationState.InProgress
+        : ReservationState.Finished;
+
+    /// <summary>Отмена допускается только до начала занятия и с указанием причины.</summary>
+    public void Cancel(string? reason, DateTime now)
+    {
+        reason = (reason ?? "").Trim();
+        if (IsCancelled) throw new DomainException("Бронирование уже отменено");
+        if (now >= Start) throw new DomainException("Отменить можно только бронирование, занятие по которому ещё не началось");
+        if (reason.Length < 5) throw new DomainException("Укажите причину отмены (не менее 5 символов)");
+        if (reason.Length > 200) throw new DomainException("Причина отмены не должна превышать 200 символов");
+        CancelledAt = now;
+        CancelReason = reason;
+    }
+
     /// <summary>Учебные данные: бронирование без проверок (используется только при заполнении пустой базы).</summary>
-    public static Reservation Seed(Room room, DateTime start, DateTime end, string organizer, string? studyGroup,
+    public static Reservation Seed(Room room, TimeSlot slot, string organizer, string? studyGroup,
         string purpose, int attendees, DateTime createdAt, string? cancelReason = null)
     {
-        var r = new Reservation(room, start, end, organizer, studyGroup, purpose, attendees, createdAt);
+        var r = new Reservation(room, slot, organizer, studyGroup, purpose, attendees, createdAt);
         if (cancelReason != null)
         {
-            r.CancelledAt = start.AddDays(-2);
+            r.CancelledAt = createdAt.AddHours(3);
             r.CancelReason = cancelReason;
         }
         return r;

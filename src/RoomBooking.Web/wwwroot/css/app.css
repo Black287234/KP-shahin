@@ -67,3 +67,26 @@ table.grid td.actions { white-space: nowrap; text-align: right; }
 .validation-summary-valid { display: none; }
 .note ul { margin: 0; padding-left: 18px; }
 .back { margin-top: 20px; }
+fieldset { border: 0; padding: 0; margin: 0 0 8px; }
+legend { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--brand); }
+.chip { display: inline-block; margin: 4px 6px 0 0; padding: 2px 10px; border: 1px solid #9cc3bf; border-radius: 12px; background: #fff; text-decoration: none; font-size: 13px; }
+.actions-row { margin-bottom: 8px; }
+/* Шкала занятости */
+.sched { padding: 10px 16px; }
+.sched-row { display: grid; grid-template-columns: 120px 1fr 80px; gap: 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid #eef1f4; }
+.sched-row:last-child { border-bottom: 0; }
+.sched-row.head { font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.sched-row .who { display: flex; flex-direction: column; }
+.sched-row .load { text-align: right; font-variant-numeric: tabular-nums; }
+.scale { display: grid; grid-template-columns: repeat(13, 1fr); }
+.scale span { border-left: 1px solid var(--line); padding-left: 3px; }
+.timeline { display: flex; height: 28px; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; background: #fff; }
+.seg { display: block; height: 100%; }
+.seg.free { background: repeating-linear-gradient(90deg, #fff 0, #fff calc(100% - 1px), #f1f4f6 calc(100% - 1px)); }
+.seg.busy { background: var(--brand); color: #fff; font-size: 11px; line-height: 28px; padding-left: 4px; text-decoration: none; overflow: hidden; white-space: nowrap; border-right: 1px solid #fff; }
+.seg.busy:hover { background: #0b4643; }
+@media (max-width: 760px) {
+  .tiles { grid-template-columns: repeat(2, 1fr); }
+  .sched-row { grid-template-columns: 70px 1fr 50px; }
+  .scale span:nth-child(odd) { visibility: hidden; }
+}

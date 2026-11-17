@@ -1,0 +1,54 @@
+@page
+@model RoomBooking.Web.Pages.Reservations.NewModel
+@{
+    ViewData["Title"] = "Новое бронирование";
+}
+<h1>Новое бронирование</h1>
+<p class="sub">Бронирование принимается на время с @TimeSlot.DayStart.ToString("HH:mm") до @TimeSlot.DayEnd.ToString("HH:mm"), продолжительностью от @TimeSlot.MinMinutes минут до @(TimeSlot.MaxMinutes / 60) часов, не более чем на @BookingPolicy.MaxDaysAhead дней вперёд.</p>
+
+<form method="post" class="panel form" novalidate>
+    <div asp-validation-summary="All" class="note err"></div>
+
+    @if (Model.Alternatives.Count > 0)
+    {
+        <div class="note info">
+            <b>На это время свободны аудитории:</b>
+            @foreach (var a in Model.Alternatives)
+            {
+                <a class="chip" asp-page="/Reservations/New" asp-route-roomId="@a.Id" asp-route-date="@Model.Input.Date?.ToString("yyyy-MM-dd")"
+                   asp-route-from="@Model.Input.From?.ToString("HH:mm")" asp-route-to="@Model.Input.To?.ToString("HH:mm")">@a.Code (@a.Seats мест)</a>
+            }
+        </div>
+    }
+
+    <fieldset>
+        <legend>Аудитория и время</legend>
+        <div class="row">
+            <div class="field">
+                <label asp-for="Input.RoomId"></label>
+                <select asp-for="Input.RoomId">
+                    <option value="">выберите</option>
+                    @foreach (var r in Model.Rooms) { <option value="@r.Id">@r.Code — @r.Kind.Text(), @r.Seats мест</option> }
+                </select>
+            </div>
+            <div class="field"><label asp-for="Input.Date"></label><input asp-for="Input.Date" type="date" asp-format="{0:yyyy-MM-dd}" /></div>
+            <div class="field narrow"><label asp-for="Input.From"></label><input asp-for="Input.From" type="time" step="300" asp-format="{0:HH:mm}" /></div>
+            <div class="field narrow"><label asp-for="Input.To"></label><input asp-for="Input.To" type="time" step="300" asp-format="{0:HH:mm}" /></div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Сведения о занятии</legend>
+        <div class="row">
+            <div class="field wide"><label asp-for="Input.Purpose"></label><input asp-for="Input.Purpose" maxlength="200" placeholder="дисциплина или мероприятие" /></div>
+        </div>
+        <div class="row">
+            <div class="field"><label asp-for="Input.Organizer"></label><input asp-for="Input.Organizer" maxlength="100" placeholder="Фамилия И. О." /></div>
+            <div class="field"><label asp-for="Input.StudyGroup"></label><input asp-for="Input.StudyGroup" maxlength="30" placeholder="необязательно" /></div>
+            <div class="field narrow"><label asp-for="Input.Attendees"></label><input asp-for="Input.Attendees" type="number" min="1" /></div>
+        </div>
+    </fieldset>
+    <div class="row">
+        <button class="btn" type="submit">Забронировать</button>
+        <a class="btn light" asp-page="/Reservations/Index">Отмена</a>
+    </div>
+</form>

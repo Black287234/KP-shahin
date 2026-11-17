@@ -1,0 +1,63 @@
+@page
+@model RoomBooking.Web.Pages.Schedule.WeekModel
+@{
+    ViewData["Title"] = "Расписание аудитории на неделю";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+}
+<h1>Расписание аудитории @Model.Room?.Code на неделю</h1>
+<p class="sub">@Model.Monday.ToString("dd.MM.yyyy") — @Model.Monday.AddDays(5).ToString("dd.MM.yyyy")</p>
+
+<form method="get" class="panel row filter">
+    <div class="field">
+        <label for="RoomId">Аудитория</label>
+        <select asp-for="RoomId">
+            @foreach (var r in Model.Rooms) { <option value="@r.Id">@r.Code — @r.Kind.Text()</option> }
+        </select>
+    </div>
+    <div class="field"><label for="Date">Любая дата недели</label><input asp-for="Date" type="date" value="@Model.Monday.ToString("yyyy-MM-dd")" /></div>
+    <button class="btn" type="submit">Показать</button>
+    <a class="btn light" asp-route-roomId="@Model.RoomId" asp-route-date="@Model.Monday.AddDays(-7).ToString("yyyy-MM-dd")">Предыдущая неделя</a>
+    <a class="btn light" asp-route-roomId="@Model.RoomId" asp-route-date="@Model.Monday.AddDays(7).ToString("yyyy-MM-dd")">Следующая неделя</a>
+</form>
+
+@if (Model.Room is null)
+{
+    <div class="note info">В каталоге нет действующих аудиторий.</div>
+}
+else
+{
+    <div class="panel sched">
+        <div class="sched-row head"><div class="who"></div><partial name="_Scale" /><div class="load"></div></div>
+        @foreach (var d in Model.Days)
+        {
+            <div class="sched-row">
+                <div class="who"><a asp-page="/Schedule/Day" asp-route-date="@d.Date.ToString("yyyy-MM-dd")"><b>@d.Date.ToString("ddd, dd.MM", culture)</b></a></div>
+                <partial name="_Timeline" model="d.Blocks" />
+                <div class="load"><a class="small" asp-page="/Reservations/New" asp-route-roomId="@Model.RoomId" asp-route-date="@d.Date.ToString("yyyy-MM-dd")">занять</a></div>
+            </div>
+        }
+    </div>
+
+    <h2>Бронирования за неделю</h2>
+    @if (!Model.Listed.Any())
+    {
+        <div class="note info">На эту неделю аудитория свободна.</div>
+    }
+    else
+    {
+        <table class="grid">
+            <thead><tr><th>Дата</th><th>Время</th><th>Цель</th><th>Ответственный</th><th>Группа</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Listed)
+            {
+                <tr>
+                    <td>@r.Start.ToString("dd.MM.yyyy")</td>
+                    <td>@r.Start.ToString("HH:mm")–@r.End.ToString("HH:mm")</td>
+                    <td>@r.Purpose</td><td>@r.Organizer</td><td>@(r.StudyGroup ?? "—")</td>
+                    <td class="actions"><a asp-page="/Reservations/Card" asp-route-id="@r.Id">Открыть</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}

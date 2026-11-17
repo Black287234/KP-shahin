@@ -1,0 +1,63 @@
+@page
+@model RoomBooking.Web.Pages.Reservations.IndexModel
+@{
+    ViewData["Title"] = "Журнал бронирований";
+}
+<div class="head-row">
+    <div>
+        <h1>Журнал бронирований</h1>
+        <p class="sub">Найдено записей: @Model.Items.Count</p>
+    </div>
+    <a class="btn" asp-page="/Reservations/New">Новое бронирование</a>
+</div>
+
+<form method="get" class="panel row filter">
+    <div class="field"><label for="From">С даты</label><input asp-for="From" type="date" asp-format="{0:yyyy-MM-dd}" /></div>
+    <div class="field"><label for="To">По дату</label><input asp-for="To" type="date" asp-format="{0:yyyy-MM-dd}" /></div>
+    <div class="field">
+        <label for="RoomId">Аудитория</label>
+        <select asp-for="RoomId">
+            <option value="">все</option>
+            @foreach (var r in Model.Rooms) { <option value="@r.Id">@r.Code</option> }
+        </select>
+    </div>
+    <div class="field">
+        <label for="State">Состояние</label>
+        <select asp-for="State" asp-items="Html.GetEnumSelectList<ReservationState>()"><option value="">любое</option></select>
+    </div>
+    <div class="field"><label for="Organizer">Ответственный</label><input asp-for="Organizer" /></div>
+    <button class="btn" type="submit">Найти</button>
+    <a class="btn light" asp-page="/Reservations/Index">Сбросить</a>
+</form>
+
+@if (Model.Problem != null)
+{
+    <div class="note err">@Model.Problem</div>
+}
+else if (Model.Items.Count == 0)
+{
+    <div class="note info">Бронирования, удовлетворяющие условиям отбора, не найдены.</div>
+}
+else
+{
+    <table class="grid">
+        <thead><tr><th>Дата</th><th>Время</th><th>Аудитория</th><th>Цель</th><th>Ответственный</th><th>Группа</th><th class="num">Чел.</th><th>Состояние</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.Items)
+        {
+            var st = r.StateAt(Model.Now);
+            <tr class="@(st == ReservationState.Cancelled ? "off" : "")">
+                <td>@r.Start.ToString("dd.MM.yyyy")</td>
+                <td>@r.Start.ToString("HH:mm")–@r.End.ToString("HH:mm")</td>
+                <td><b>@r.Room!.Code</b></td>
+                <td>@r.Purpose</td>
+                <td>@r.Organizer</td>
+                <td>@(r.StudyGroup ?? "—")</td>
+                <td class="num">@r.Attendees</td>
+                <td><partial name="_State" model="st" /></td>
+                <td class="actions"><a asp-page="/Reservations/Card" asp-route-id="@r.Id">Открыть</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

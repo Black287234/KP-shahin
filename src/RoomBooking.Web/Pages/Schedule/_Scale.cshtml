@@ -1,0 +1,7 @@
+@* Деления шкалы: часы рабочего дня *@
+<div class="scale">
+@for (var h = TimeSlot.DayStart.Hour; h < TimeSlot.DayEnd.Hour; h++)
+{
+    <span>@h.ToString("00"):00</span>
+}
+</div>

@@ -30,6 +30,7 @@ public class BookingContext(DbContextOptions<BookingContext> options) : DbContex
             e.Property(x => x.Purpose).HasMaxLength(200).IsRequired();
             e.Property(x => x.CancelReason).HasMaxLength(200);
             e.Ignore(x => x.IsCancelled);
+            e.Ignore(x => x.Slot);
             // Аудитория 1 — N бронирований; удаление аудитории с бронированиями запрещено
             e.HasOne(x => x.Room).WithMany().HasForeignKey(x => x.RoomId).OnDelete(DeleteBehavior.Restrict);
             // Индекс для поиска пересекающихся бронирований аудитории

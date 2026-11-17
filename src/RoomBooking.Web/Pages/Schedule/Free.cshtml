@@ -1,0 +1,42 @@
+@page
+@model RoomBooking.Web.Pages.Schedule.FreeModel
+@{
+    ViewData["Title"] = "Свободные аудитории";
+}
+<h1>Поиск свободной аудитории</h1>
+<p class="sub">Показываются действующие аудитории, не занятые в течение всего указанного интервала и вмещающие нужное число участников.</p>
+
+<form method="get" class="panel row filter">
+    <div class="field"><label for="Date">Дата</label><input asp-for="Date" type="date" asp-format="{0:yyyy-MM-dd}" /></div>
+    <div class="field narrow"><label for="From">С</label><input asp-for="From" type="time" step="300" asp-format="{0:HH:mm}" /></div>
+    <div class="field narrow"><label for="To">До</label><input asp-for="To" type="time" step="300" asp-format="{0:HH:mm}" /></div>
+    <div class="field narrow"><label for="Seats">Участников</label><input asp-for="Seats" type="number" min="1" /></div>
+    <label class="check"><input asp-for="Projector" /> нужен проектор</label>
+    <button class="btn" type="submit">Найти</button>
+</form>
+
+@if (Model.Problem != null)
+{
+    <div class="note err">@Model.Problem</div>
+}
+else if (Model.Found is { Count: 0 })
+{
+    <div class="note info">Свободных аудиторий на указанное время нет.</div>
+}
+else if (Model.Found != null)
+{
+    <table class="grid">
+        <thead><tr><th>Аудитория</th><th>Корпус</th><th>Назначение</th><th class="num">Мест</th><th>Проектор</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.Found)
+        {
+            <tr>
+                <td><b>@r.Code</b></td><td>@r.Building</td><td>@r.Kind.Text()</td><td class="num">@r.Seats</td>
+                <td>@(r.HasProjector ? "есть" : "нет")</td>
+                <td class="actions"><a class="btn small" asp-page="/Reservations/New" asp-route-roomId="@r.Id"
+                    asp-route-date="@Model.Date?.ToString("yyyy-MM-dd")" asp-route-from="@Model.From?.ToString("HH:mm")" asp-route-to="@Model.To?.ToString("HH:mm")">Забронировать</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

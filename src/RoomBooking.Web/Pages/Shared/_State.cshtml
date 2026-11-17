@@ -1,0 +1,11 @@
+@model ReservationState
+@{
+    var css = Model switch
+    {
+        ReservationState.Planned => "plan",
+        ReservationState.InProgress => "now",
+        ReservationState.Finished => "done",
+        _ => "cancel"
+    };
+}
+<span class="tag @css">@Model.Text()</span>

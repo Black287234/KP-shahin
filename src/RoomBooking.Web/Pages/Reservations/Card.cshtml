@@ -1,0 +1,41 @@
+@page "{id:int}"
+@model RoomBooking.Web.Pages.Reservations.CardModel
+@{
+    var r = Model.Item;
+    ViewData["Title"] = "Бронирование № " + r.Id;
+}
+<div class="head-row">
+    <div>
+        <h1>Бронирование № @r.Id</h1>
+        <p class="sub">Аудитория @r.Room!.Code · @r.Start.ToString("dd.MM.yyyy") · @r.Start.ToString("HH:mm")–@r.End.ToString("HH:mm")</p>
+    </div>
+    <partial name="_State" model="Model.State" />
+</div>
+
+<div class="panel">
+    <dl class="facts">
+        <dt>Цель</dt><dd>@r.Purpose</dd>
+        <dt>Ответственный</dt><dd>@r.Organizer</dd>
+        <dt>Группа</dt><dd>@(r.StudyGroup ?? "—")</dd>
+        <dt>Участников</dt><dd>@r.Attendees из @r.Room.Seats мест</dd>
+        <dt>Аудитория</dt><dd><a asp-page="/Rooms/Card" asp-route-id="@r.RoomId">@r.Room.Code</a>, @r.Room.Building, @r.Room.Kind.Text()</dd>
+        <dt>Оформлено</dt><dd>@r.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+        @if (r.IsCancelled)
+        {
+            <dt>Отменено</dt><dd>@r.CancelledAt!.Value.ToString("dd.MM.yyyy HH:mm") — @r.CancelReason</dd>
+        }
+    </dl>
+</div>
+
+@if (Model.State == ReservationState.Planned)
+{
+    <h2>Отмена бронирования</h2>
+    <form method="post" asp-page-handler="Cancel" class="panel row">
+        <div class="field wide"><label for="Reason">Причина отмены</label><input id="Reason" name="Reason" maxlength="200" /></div>
+        <button class="btn warn" type="submit">Отменить бронирование</button>
+    </form>
+}
+<p class="back">
+    <a class="btn light" asp-page="/Reservations/Index">К журналу</a>
+    <a class="btn light" asp-page="/Schedule/Day" asp-route-date="@r.Start.ToString("yyyy-MM-dd")">Расписание на этот день</a>
+</p>
