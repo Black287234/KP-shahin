@@ -1,0 +1,38 @@
+# Запуск приложения, проверка страниц и развёртывание из архива в чистый каталог
+name: pages
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build RoomBooking.sln -c Release
+      - name: Проверка страниц
+        run: |
+          cd src/RoomBooking.Web
+          rm -f roombooking.db
+          nohup dotnet run --no-build -c Release --urls http://localhost:5085 > /tmp/app.log 2>&1 &
+          for i in $(seq 1 60); do curl -s http://localhost:5085 > /dev/null && break; sleep 1; done
+          cd ../..
+          python3 tools/check_pages.py http://localhost:5085
+      - name: Журнал приложения
+        if: always()
+        run: grep -iE "fail|exception|error" /tmp/app.log | head -40 || true
+      - name: Развёртывание из архива
+        run: |
+          pkill -f RoomBooking.Web || true
+          git archive -o /tmp/project.zip HEAD
+          mkdir -p /tmp/deploy && cd /tmp/deploy && unzip -q /tmp/project.zip
+          dotnet build RoomBooking.sln -c Release 2>&1 | tail -2
+          cd src/RoomBooking.Web
+          nohup dotnet run --no-build -c Release --urls http://localhost:5086 > /tmp/deploy.log 2>&1 &
+          for i in $(seq 1 60); do curl -s http://localhost:5086 > /dev/null && break; sleep 1; done
+          echo "Аудиторий в API: $(curl -s http://localhost:5086/api/rooms | grep -o '"code"' | wc -l)"
+          ls -la roombooking.db
