@@ -1,0 +1,47 @@
+# Запросы к JSON API модуля бронирования (Visual Studio / Rider / VS Code REST Client)
+@host = http://localhost:5085
+
+### Каталог аудиторий (действующие)
+GET {{host}}/api/rooms
+
+### Аудитории не менее чем на 25 мест
+GET {{host}}/api/rooms?minSeats=25
+
+### Карточка аудитории
+GET {{host}}/api/rooms/1
+
+### Свободные аудитории на интервал
+GET {{host}}/api/rooms/free?date=2026-12-01&from=10:10&to=11:40&seats=20&projector=true
+
+### Журнал бронирований за период
+GET {{host}}/api/reservations?from=2026-12-01&to=2026-12-05
+
+### Новое бронирование
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 3,
+  "date": "2026-12-01",
+  "from": "17:20",
+  "to": "18:50",
+  "organizer": "Крючков В. В.",
+  "studyGroup": "ИСиП-23/1",
+  "purpose": "Консультация по курсовому проекту",
+  "attendees": 15
+}
+
+### Отмена бронирования
+POST {{host}}/api/reservations/1/cancel
+Content-Type: application/json
+
+{ "reason": "Занятие перенесено" }
+
+### Расписание занятости на день
+GET {{host}}/api/schedule/2026-12-01
+
+### Ошибка формата: ответ 400 с текстом на русском языке
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{ "roomId": 1, "date": "32.13.2026" }

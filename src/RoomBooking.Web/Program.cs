@@ -11,6 +11,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<RoomRegistry>();
 builder.Services.AddScoped<ReservationDesk>();
 builder.Services.AddScoped<ScheduleBuilder>();
+ApiErrors.Configure(builder.Services);
 
 var app = builder.Build();
 
@@ -27,6 +28,7 @@ if (!app.Environment.IsDevelopment())
 
 // Ответы 404 без содержимого выводятся страницей «Запись не найдена»
 app.UseStatusCodePagesWithReExecute("/NotFound");
+ApiErrors.Use(app);
 app.UseStaticFiles();
 app.UseRouting();
 app.MapRazorPages();

@@ -29,7 +29,7 @@ public class Room
     /// <summary>Изменение сведений об аудитории с проверкой данных.</summary>
     public void Change(string code, string building, RoomKind kind, int seats, bool hasProjector)
     {
-        code = (code ?? "").Trim().ToUpperInvariant();
+        code = NormalizeCode(code);
         building = (building ?? "").Trim();
 
         if (code.Length == 0) throw new DomainException("Не указан номер аудитории");
@@ -44,6 +44,23 @@ public class Room
         Kind = kind;
         Seats = seats;
         HasProjector = hasProjector;
+    }
+
+    // Латинские буквы, совпадающие по написанию с русскими
+    private const string LatinLookalikes = "ABCEHKMOPTXY";
+    private const string CyrillicLetters = "АВСЕНКМОРТХУ";
+
+    /// <summary>
+    /// Приведение номера к единому виду: без пробелов по краям, в верхнем регистре.
+    /// Если все латинские буквы номера имеют русские двойники (A-101, B-203), они заменяются русскими,
+    /// иначе номера «A-101» и «А-101» выглядели бы одинаково, но считались разными.
+    /// </summary>
+    public static string NormalizeCode(string? code)
+    {
+        code = (code ?? "").Trim().ToUpperInvariant();
+        var latin = code.Where(c => c is >= 'A' and <= 'Z').ToList();
+        if (latin.Count == 0 || latin.Any(c => !LatinLookalikes.Contains(c))) return code;
+        return new string(code.Select(c => LatinLookalikes.IndexOf(c) is var i and >= 0 ? CyrillicLetters[i] : c).ToArray());
     }
 
     /// <summary>Вывод из эксплуатации вместо удаления: история бронирований сохраняется.</summary>

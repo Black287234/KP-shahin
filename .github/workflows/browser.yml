@@ -16,6 +16,10 @@ permissions:
 jobs:
   browser:
     runs-on: ubuntu-latest
+    env:
+      # Русская локаль браузера: даты в полях ввода вида дд.мм.гггг, время в 24-часовом формате
+      LANG: ru_RU.UTF-8
+      LANGUAGE: ru_RU:ru
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

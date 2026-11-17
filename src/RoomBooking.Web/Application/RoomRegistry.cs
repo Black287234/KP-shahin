@@ -16,7 +16,7 @@ public record RoomInput(string? Code, string? Building, RoomKind Kind, int? Seat
 /// Прикладной сервис каталога аудиторий: поиск, регистрация, изменение, вывод из эксплуатации.
 /// Правила самой аудитории проверяет класс Room; здесь — правила, требующие обращения к базе данных.
 /// </summary>
-public class RoomRegistry(BookingContext db)
+public class RoomRegistry(BookingContext db, TimeProvider clock)
 {
     public IReadOnlyList<Room> Find(RoomQuery q)
     {
@@ -51,6 +51,11 @@ public class RoomRegistry(BookingContext db)
         var room = Load(id);
         room.Change(input.Code ?? "", input.Building ?? "", input.Kind, input.Seats ?? 0, input.HasProjector);
         EnsureUniqueCode(room.Code, id);
+        // Вместимость нельзя уменьшить ниже числа участников предстоящих бронирований
+        var larger = Upcoming(id).Where(r => r.Attendees > room.Seats).OrderBy(r => r.Start).FirstOrDefault();
+        if (larger != null)
+            throw new DomainException(
+                $"Нельзя уменьшить число мест до {room.Seats}: на {larger.Start:dd.MM.yyyy HH\\:mm} оформлено бронирование на {larger.Attendees} участников");
         db.SaveChanges();
         return room;
     }
@@ -58,6 +63,11 @@ public class RoomRegistry(BookingContext db)
     public void TakeOutOfService(int id, string? reason)
     {
         var room = Load(id);
+        // Нельзя вывести аудиторию, пока на неё есть предстоящие бронирования: они остались бы без места проведения
+        var upcoming = Upcoming(id);
+        if (upcoming.Count > 0)
+            throw new DomainException(
+                $"На аудиторию {room.Code} оформлено запланированных бронирований: {upcoming.Count} (ближайшее — {upcoming.Min(r => r.Start):dd.MM.yyyy HH\\:mm}). Отмените или перенесите их перед выводом из эксплуатации");
         room.TakeOutOfService(reason ?? "");
         db.SaveChanges();
     }
@@ -67,6 +77,13 @@ public class RoomRegistry(BookingContext db)
         var room = Load(id);
         room.ReturnToService();
         db.SaveChanges();
+    }
+
+    /// <summary>Действующие бронирования аудитории, занятие по которым ещё не закончилось.</summary>
+    private List<Core.Reservations.Reservation> Upcoming(int roomId)
+    {
+        var now = clock.GetLocalNow().DateTime;
+        return db.Reservations.Where(r => r.RoomId == roomId && r.CancelledAt == null && r.End > now).ToList();
     }
 
     private Room Load(int id) =>
