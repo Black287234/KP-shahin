@@ -1,25 +1,14 @@
 digraph G {
-  graph [rankdir=TB, fontname="Liberation Serif", bgcolor=white, compound=true, nodesep=0.35, ranksep=0.45];
-  node [shape=box, style="rounded,filled", fillcolor="#ffffff", fontname="Liberation Serif", fontsize=11];
-  edge [fontname="Liberation Serif", fontsize=10, color="#44525f"];
-  user [label="Браузер / клиент JSON API", shape=box, style="rounded", fillcolor=white];
-  subgraph cluster_web {
-    label=<<b>RoomBooking.Web</b> (ASP.NET Core)>; style="rounded"; color="#0f5e5a"; fontsize=12;
-    subgraph cluster_ui { label="Представление"; style="dashed"; color="#88aaaa";
-      pages [label="Razor Pages\nRooms/*, Reservations/*, Schedule/*"]; api [label="BookingApi\n(минимальный API /api)"]; }
-    subgraph cluster_app { label="Прикладные сервисы"; style="dashed"; color="#88aaaa";
-      registry [label="RoomRegistry"]; desk [label="ReservationDesk"]; sched [label="ScheduleBuilder"]; }
-    subgraph cluster_data { label="Данные"; style="dashed"; color="#88aaaa";
-      ctx [label="BookingContext\n(EF Core, Fluent API)"]; seed [label="SampleData\nмиграции"]; }
-  }
-  subgraph cluster_core {
-    label=<<b>RoomBooking.Core</b> (предметная область)>; style="rounded"; color="#0f5e5a"; fontsize=12;
-    room [label="Room"]; res [label="Reservation"]; slot [label="TimeSlot"]; pol [label="BookingPolicy"];
-  }
-  db [label="SQLite\nroombooking.db", shape=cylinder, style=filled, fillcolor="#e3f0ef"];
-  user -> pages; user -> api;
-  pages -> registry; pages -> desk; pages -> sched; api -> desk; api -> registry; api -> sched;
-  desk -> pol [lhead=cluster_core]; registry -> room [lhead=cluster_core];
-  desk -> ctx; registry -> ctx; sched -> ctx;
-  ctx -> db;
+  graph [rankdir=TB, fontname="Liberation Serif", bgcolor=white, nodesep=0.6, ranksep=0.45];
+  node [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#0f5e5a", penwidth=1.5, fontname="Liberation Serif", fontsize=14, width=4.2, height=0.75];
+  edge [color="#0f5e5a", penwidth=1.3, arrowsize=0.9];
+  u  [label="Пользователь (браузер)", fillcolor="#e3f0ef"];
+  p  [label="Страницы и JSON API\nаудитории, бронирование, расписание"];
+  s  [label="Сервисы\nкаталог, бронирование, расписание"];
+  c  [label="Правила (проект RoomBooking.Core)\nаудитория, бронирование, интервал"];
+  d  [label="База данных SQLite", shape=cylinder, fillcolor="#e3f0ef", width=2.6];
+  u -> p -> s;
+  s -> c [label="  проверка правил", fontname="Liberation Serif", fontsize=12];
+  s -> d [label="  чтение и запись", fontname="Liberation Serif", fontsize=12];
+  {rank=same; c; d}
 }
