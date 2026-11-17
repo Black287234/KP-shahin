@@ -1,0 +1,33 @@
+digraph G {
+  graph [rankdir=LR, fontname="Liberation Serif", bgcolor=white, nodesep=0.6];
+  node [shape=plain, fontname="Liberation Serif", fontsize=11];
+  edge [fontname="Liberation Serif", fontsize=10, arrowhead=crow, arrowtail=tee, dir=both];
+  Rooms [label=<
+  <table border="1" cellborder="1" cellspacing="0" cellpadding="3">
+   <tr><td colspan="3" bgcolor="#0f5e5a"><font color="white"><b>Rooms</b></font></td></tr>
+   <tr><td><b>PK</b></td><td align="left">Id</td><td align="left">INTEGER</td></tr>
+   <tr><td><b>UQ</b></td><td align="left">Code</td><td align="left">TEXT(20)</td></tr>
+   <tr><td></td><td align="left">Building</td><td align="left">TEXT(50)</td></tr>
+   <tr><td></td><td align="left">Kind</td><td align="left">TEXT(20)</td></tr>
+   <tr><td></td><td align="left">Seats</td><td align="left">INTEGER</td></tr>
+   <tr><td></td><td align="left">HasProjector</td><td align="left">INTEGER</td></tr>
+   <tr><td></td><td align="left">IsOutOfService</td><td align="left">INTEGER</td></tr>
+   <tr><td></td><td align="left">OutOfServiceReason</td><td align="left">TEXT(200) NULL</td></tr>
+  </table>>];
+  Reservations [label=<
+  <table border="1" cellborder="1" cellspacing="0" cellpadding="3">
+   <tr><td colspan="3" bgcolor="#0f5e5a"><font color="white"><b>Reservations</b></font></td></tr>
+   <tr><td><b>PK</b></td><td align="left">Id</td><td align="left">INTEGER</td></tr>
+   <tr><td><b>FK, IX</b></td><td align="left" port="fk">RoomId</td><td align="left">INTEGER</td></tr>
+   <tr><td><b>IX</b></td><td align="left">Start</td><td align="left">TEXT (дата и время)</td></tr>
+   <tr><td><b>IX</b></td><td align="left">End</td><td align="left">TEXT (дата и время)</td></tr>
+   <tr><td></td><td align="left">Organizer</td><td align="left">TEXT(100)</td></tr>
+   <tr><td></td><td align="left">StudyGroup</td><td align="left">TEXT(30) NULL</td></tr>
+   <tr><td></td><td align="left">Purpose</td><td align="left">TEXT(200)</td></tr>
+   <tr><td></td><td align="left">Attendees</td><td align="left">INTEGER</td></tr>
+   <tr><td></td><td align="left">CreatedAt</td><td align="left">TEXT</td></tr>
+   <tr><td></td><td align="left">CancelledAt</td><td align="left">TEXT NULL</td></tr>
+   <tr><td></td><td align="left">CancelReason</td><td align="left">TEXT(200) NULL</td></tr>
+  </table>>];
+  Rooms -> Reservations:fk [label="  1 : N  (ON DELETE RESTRICT)  "];
+}

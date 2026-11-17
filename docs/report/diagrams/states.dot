@@ -1,0 +1,12 @@
+digraph G {
+  graph [rankdir=LR, fontname="Liberation Serif", bgcolor=white, nodesep=0.5];
+  node [shape=box, style="rounded,filled", fillcolor="#e3f0ef", fontname="Liberation Serif", fontsize=12];
+  edge [fontname="Liberation Serif", fontsize=10];
+  start [shape=circle, label="", width=0.2, style=filled, fillcolor=black];
+  stop [shape=doublecircle, label="", width=0.15, style=filled, fillcolor=black];
+  P [label="Запланировано\nnow < Start"]; I [label="Идёт занятие\nStart ≤ now < End"];
+  F [label="Завершено\nnow ≥ End"]; C [label="Отменено\nCancelledAt ≠ null", fillcolor="#fbeceb"];
+  start -> P [label=" BookingPolicy.Book"];
+  P -> I [label=" наступило время начала"]; I -> F [label=" наступило время окончания"];
+  P -> C [label=" Cancel(причина)"]; F -> stop; C -> stop;
+}

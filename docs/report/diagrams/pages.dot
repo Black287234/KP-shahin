@@ -1,0 +1,12 @@
+digraph G {
+  graph [rankdir=LR, fontname="Liberation Serif", bgcolor=white, nodesep=0.25, ranksep=0.6];
+  node [shape=box, style="rounded,filled", fillcolor="#ffffff", fontname="Liberation Serif", fontsize=11];
+  edge [color="#5d6b7a", arrowsize=0.7];
+  home [label="Главная /\nсводка на день", fillcolor="#e3f0ef"];
+  rooms [label="Rooms\nкаталог"]; rcard [label="Rooms/Card/{id}\nкарточка, вывод из\nэксплуатации"]; redit [label="Rooms/Edit/{id?}\nрегистрация,\nизменение"];
+  rnew [label="Reservations/New\nбронирование"]; rlist [label="Reservations\nжурнал"]; rescard [label="Reservations/Card/{id}\nкарточка, отмена"];
+  day [label="Schedule/Day\nрасписание на день"]; week [label="Schedule/Week\nнеделя аудитории"]; free [label="Schedule/Free\nсвободные аудитории"];
+  home -> rooms; home -> rnew; home -> rlist; home -> day; home -> free;
+  rooms -> rcard -> redit; rooms -> redit;
+  rnew -> rescard; rlist -> rescard; day -> rescard; day -> week; week -> rnew; free -> rnew; rescard -> day;
+}

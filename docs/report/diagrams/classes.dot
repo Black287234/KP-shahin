@@ -1,0 +1,53 @@
+digraph G {
+  graph [rankdir=TB, fontname="Liberation Serif", nodesep=0.5, ranksep=0.6, bgcolor=white];
+  node [shape=plain, fontname="Liberation Serif", fontsize=11];
+  edge [fontname="Liberation Serif", fontsize=10];
+
+  Room [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#e3f0ef"><b>Room</b> (Аудитория)</td></tr>
+   <tr><td align="left" balign="left">+ Id: int<br/>+ Code: string<br/>+ Building: string<br/>+ Kind: RoomKind<br/>+ Seats: int<br/>+ HasProjector: bool<br/>+ IsOutOfService: bool<br/>+ OutOfServiceReason: string?</td></tr>
+   <tr><td align="left" balign="left" border="1" sides="t">+ Change(code, building, kind, seats, projector)<br/>+ TakeOutOfService(reason)<br/>+ ReturnToService()<br/>+ NormalizeCode(code): string</td></tr>
+  </table>>];
+
+  Reservation [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#e3f0ef"><b>Reservation</b> (Бронирование)</td></tr>
+   <tr><td align="left" balign="left">+ Id: int<br/>+ RoomId: int<br/>+ Start, End: DateTime<br/>+ Organizer: string<br/>+ StudyGroup: string?<br/>+ Purpose: string<br/>+ Attendees: int<br/>+ CreatedAt: DateTime<br/>+ CancelledAt: DateTime?<br/>+ CancelReason: string?</td></tr>
+   <tr><td align="left" balign="left" border="1" sides="t">+ StateAt(now): ReservationState<br/>+ Cancel(reason, now)</td></tr>
+  </table>>];
+
+  TimeSlot [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#f3f5f7"><i>«value object»</i><br/><b>TimeSlot</b></td></tr>
+   <tr><td align="left" balign="left">+ Start, End: DateTime<br/>+ Date: DateOnly<br/>+ Minutes: int</td></tr>
+   <tr><td align="left" balign="left" border="1" sides="t">+ On(date, from, to): TimeSlot<br/>+ Overlaps(start, end): bool</td></tr>
+  </table>>];
+
+  Policy [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#f3f5f7"><i>«static»</i><br/><b>BookingPolicy</b></td></tr>
+   <tr><td align="left" balign="left">+ MaxDaysAhead = 60</td></tr>
+   <tr><td align="left" balign="left" border="1" sides="t">+ Book(room, request, existing, now): Reservation<br/>+ FindConflict(existing, slot): Reservation?</td></tr>
+  </table>>];
+
+  Request [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#f3f5f7"><i>«record»</i><br/><b>BookingRequest</b></td></tr>
+   <tr><td align="left" balign="left">Slot, Organizer, StudyGroup,<br/>Purpose, Attendees</td></tr>
+  </table>>];
+
+  Exc [label=<
+  <table border="1" cellborder="0" cellspacing="0" cellpadding="3">
+   <tr><td bgcolor="#fbeceb"><b>DomainException</b></td></tr>
+   <tr><td bgcolor="#fbeceb" border="1" sides="t"><b>BookingConflictException</b><br/>+ Conflict: Reservation</td></tr>
+  </table>>];
+
+  Room -> Reservation [arrowhead=none, taillabel="1", headlabel="0..*", label="  бронируется"];
+  Reservation -> TimeSlot [style=dashed, arrowhead=vee, label=" Slot"];
+  Policy -> Reservation [style=dashed, arrowhead=vee, label=" создаёт"];
+  Policy -> Request [style=dashed, arrowhead=vee, label=" использует"];
+  Request -> TimeSlot [arrowhead=diamond, dir=back, label=" "];
+  Policy -> Exc [style=dashed, arrowhead=vee, label=" выбрасывает"];
+  {rank=same; Room; Reservation; TimeSlot}
+}

@@ -1,0 +1,22 @@
+digraph G {
+  graph [rankdir=TB, fontname="Liberation Serif", bgcolor=white, nodesep=0.4, ranksep=0.35];
+  node [fontname="Liberation Serif", fontsize=11, shape=box, style=rounded];
+  edge [fontname="Liberation Serif", fontsize=10];
+  s [label="Начало", shape=oval];
+  a [label="Форма: аудитория, дата, время,\nцель, ответственный, участники", shape=parallelogram, style=""];
+  b [label="TimeSlot.On(дата, начало, окончание)"];
+  c [label="Интервал корректен?", shape=diamond, style=""];
+  d [label="BEGIN TRANSACTION\nзагрузка аудитории и бронирований на дату"];
+  e [label="Аудитория в эксплуатации,\nучастников ≤ мест,\nне в прошлом, ≤ 60 дней?", shape=diamond, style=""];
+  f [label="Есть действующее бронирование\nс a1 < b2 и a2 < b1?", shape=diamond, style=""];
+  g [label="Сохранение бронирования\nCOMMIT"];
+  h [label="Сообщение об ошибке", shape=parallelogram, style=""];
+  i [label="Сообщение о занятом времени\n+ список свободных аудиторий", shape=parallelogram, style=""];
+  k [label="Карточка бронирования", shape=parallelogram, style=""];
+  z [label="Конец", shape=oval];
+  s -> a -> b -> c;
+  c -> d [label=" да"]; c -> h [label=" нет"];
+  d -> e; e -> f [label=" да"]; e -> h [label=" нет"];
+  f -> g [label=" нет"]; f -> i [label=" да"];
+  g -> k -> z; h -> z; i -> z;
+}
